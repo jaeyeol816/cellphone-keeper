@@ -1,10 +1,13 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <Adafruit_NeoPixel.h>
+#include <Adafruit_SPITFT.h>
+#include <Adafruit_GrayOLED.h>
 
 #define START 1
 #define TIMER_CONFIG 2
 #define TIMER 3
-#define USER_SETUP 4
+#define OPTION 4
 #define STATISTICS 5
 #define STOPPED 6
 #define ENDED  7
@@ -17,77 +20,66 @@
 #define PURPLE 6
 #define ORANGE 7
 
+#define NUM_OF_PIXELS 7
+
 /*
 핀번호
-2: 
-~3: 
-4: 
-~5: 
-~6: 
-7: 
-8: 멀티플렉서 s0
-~9: 멀티플렉서 s1
-~10: 멀티플렉서 s2
-~11: 멀티플렉서 s3
-12: LED_1_PIN
-13: LED_2_PIN
-A0: 멀티플렉서 SIG_PIN
-A1: 
-A2:  
+2: start버튼
+~3: stop버튼
+4: +버튼
+~5: -버튼
+~6: ok버튼
+7: option버튼
+8: 
+~9: 스피커
+~10: LED1
+~11: LED2
+12: LED3
+13: LED4
+A0: 압전센서
+A1: 모션센서1(?)
+A2: 모션센서2(?)
 A3: 
 A4: 
 */
 
-// Write할 LED: 시프트레지스터 2개 사용해 핀 확장해야 함-->총16개 LED가능 (shiftregister PWM 알아보기)
-// <Shifty.h> 이용. https://youtu.be/fKjff9-7Mq8
+const int startButton = 2;
+const int stopButton = 3;
+const int plusButton = 4;
+const int minusButton = 5;
+const int okButton = 6;
+const int optionButton = 7;
 
-// 시프트레지스터 이용 안해도 될수도?
-// 하드웨어는 RGB 3색 LED스트립 사용
-const int LED_1_PIN = 7;
-const int LED_2_PIN = 13;
+const int led1Pin = 10;
+const int led2Pin = 11;
 
-// 버튼,센서는 멀티플렉서(Multiplexer, MUX, 여러 아날로그 또는 디지털 입력 신호 중 하나를 선택하여 선택된 입력을 하나의 라인에 전달하는 장치)
-// 를 사용하여 핀 확장하여 인풋값 받기.
-//MUX Control Pins
-const int SIG_PIN = 0;
-const int s0 = 8; // A0, MUX 출력핀
-const int s1 = 9;
-const int s2 = 10;
-const int s3 = 11;
+const int weightSensorPin = 0;   // A0
+
 
 //현재 모드 상태
 int status = START;
+int prevStatus = START;   //돌아왔을때를 위해
+int timeLeft[3] = {0, 0, 0};  
+int time[3] = {0, 0, 0};
+int volume = 5;  
+int count[2] = {0, 0};    //접근횟수, 꺼낸횟수 세기
+int eepromAddress = 0;    // EEPROM에 writing할 주소.
+bool correctEnding = false;   //정상종료시(타이머가 다 되어서 종료되었을 시에만) true됨.
 
-int controlPin[] = {s0, s1, s2, s3};
-int muxChannel[16][4] = { {0,0,0,0},
-  {1,0,0,0}, //channel 1  -> 버튼1
-  {0,1,0,0}, //channel 2  -> 버튼2
-  {1,1,0,0}, //channel 3  -> 버튼3
-  {0,0,1,0}, //channel 4  -> 버튼4
-  {1,0,1,0}, //channel 5  -> 버튼5
-  {0,1,1,0}, //channel 6  -> 스피커
-  {1,1,1,0}, //channel 7  -> 모션센서1
-  {0,0,0,1}, //channel 8  -> 모션센서2
-  {1,0,0,1}, //channel 9  -> 압전센서
-  {0,1,0,1}, //channel 10 
-  {1,1,0,1}, //channel 11 
-  {0,0,1,1}, //channel 12 
-  {1,0,1,1}, //channel 13 
-  {0,1,1,1}, //channel 14 
-  {1,1,1,1}  //channel 15
-};
+Adafruit_NeoPixel pixels1 = Adafruit_NeoPixel(NUM_OF_PIXELS, led1Pin, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels2 = Adafruit_NeoPixel(NUM_OF_PIXELS, led2Pin, NEO_GRB + NEO_KHZ800);
+
 
 void setup() {
-  //MUX
-  pinMode(s0, INPUT);
-  pinMode(s1, OUTPUT);
-  pinMode(s2, OUTPUT);
-  pinMode(s3, OUTPUT);
+  Serial.begin(115200);   //연결된 lcd용 아두이노와 통신하기 위해
 
-  digitalWrite(s0, LOW);
-  digitalWrite(s1, LOW);
-  digitalWrite(s2, LOW);
-  digitalWrite(s3, LOW);
+  pinMode(startButton, INPUT_PULLUP);
+  pinMode(stopButton, INPUT_PULLUP);
+  pinMode(plusButton, INPUT_PULLUP);
+  pinMode(minusButton, INPUT_PULLUP);
+  pinMode(okButton, INPUT_PULLUP);
+  pinMode(optionButton, INPUT_PULLUP);
+  
 
 }
 
@@ -100,46 +92,327 @@ void set_led(int color) {
     case RED:
       break;
 
+    case BLUE:
+      for(int i=0; i<NUM_OF_PIXELS; i++){
+        // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+        pixels1.setPixelColor(i, pixels1.Color(0,0,150)); 
+        pixels2.setPixelColor(i, pixels2.Color(0,0,150)); 
+    
+        pixels1.show(); // This sends the updated pixel color to the hardware.
+        pixels2.show();
+    
+        delay(10); // Delay for a period of time (in milliseconds).
+      }
+      break;
+    
+    case GREEN:
+
+
   }
 }
 
+bool debounce(int button) {   // 인수로 들어온 버튼이 클릭되었으면 true반환, 아니면 false반환.
+  if (digitalRead(button) == HIGH) {
+    delay(5);
+    if (digitalRead(button) == HIGH) return true;
+    else return false;
+  }
+  else return false;
+}
+
+void send_time_info() {
+  Serial.print(timeLeft[0]);
+  Serial.print(",");
+  Serial.print(timeLeft[1]);
+  Serial.print(",");
+  Serial.print(timeLeft[2]);
+}
+
 void loop() {
-  while (true) {
-    switch (status) {
-      case START:
-        set_led(BLUE);
-        //시작 메뉴 출력
+ 
+  switch (status) {
+    case START:
+      //시작 메뉴 출력
+      Serial.print("a");  //연결된 lcd용 아두이노에게 a 신호를 보낸다. (시작 메뉴를 출력하도록 하기위해)
+      set_led(BLUE);
+      //무한루프
+      while(true) {
+        if (debounce(startButton) == true) {  //start버튼 클릭 시
+          status = TIMER_CONFIG;
+          break;
+        }
+        else if (debounce(optionButton) == true) {  //option버튼 클릭 시
+          status = OPTION;
+          break;
+        }
+        else if (debounce(plusButton) == true) {    // +버튼 클릭시
+          status = STATISTICS;
+          break;
+        }
+      }
+      prevStatus = START;
+      break;
 
-      case TIMER_CONFIG:
-        // 
-        //타이머 설정 화면 출력
-        //
-      case TIMER:
-        set_led(GREEN);
-        //메인 로직 (핵심적인 부분)
-        //
-        //
-        //
-      case USER_SETUP:
-        set_led(ORANGE);
-        //환경설정 화면 출력
+    case TIMER_CONFIG:
+      bool endSignal = false;    // 0 --> 계속 무한루프 돈다. 1 --> 탈출
+
+      //타이머 설정 화면 출력
+      Serial.print("b");  //연결된 lcd용 아두이노에게 b 신호를 보낸다. (타이머설정화면메뉴를 출력하도록 하기 위해)
+      set_led(PURPLE);
+
+      // LCD에게 timeLeft 정보 보내기.
+      send_time_info();
+
+      // 무한루프
+      while (true) {
+        
+        while (true) {    // 시(hour) 조절 무한루프 (ok 또는 start또는 stop버튼 눌려야 탈출)
+          if (debounce(plusButton) == true) {
+            timeLeft[0]++;
+            
+            send_time_info();
+          }
+          else if (debounce(minusButton) == true) {
+            timeLeft[0]--;
+
+            send_time_info();
+          }
+          else if (debounce(okButton) == true) {    // 분(min)조절로 넘어감.
+            break;
+          }
+          else if (debounce(startButton) == true) {   // start 클릭시 타이머 시작으로
+            status = TIMER;
+            endSignal = true;
+            break;
+          }
+          else if (debounce(stopButton) == true) {    // stop 클릭시 지금까지 맞춰놓은 것 초기화. 그리고 시작 화면으로.
+            timeLeft[0] = 0;
+            timeLeft[1] = 0;
+            timeLeft[2] = 0;
+            status = prevStatus;
+            endSignal = true;
+            break;
+          }
+          if (endSignal) break;
+
+          while (true) {    // 분(min) 조절 무한루프 (ok 또는 start 또는 stop 버튼 눌러야 탈출)
+            if (debounce(plusButton) == true) {
+              timeLeft[1]++;
+              
+              send_time_info();
+            }
+            else if (debounce(minusButton) == true) {
+              timeLeft[1]--;
+
+              send_time_info();
+            }
+            else if (debounce(okButton) == true) {    // 초(sec)조절로 넘어감.
+              break;
+            }
+            else if (debounce(startButton) == true) {   // start 클릭시 타이머 시작으로
+              status = TIMER;
+              endSignal = true;
+              break;
+            }
+            else if (debounce(stopButton) == true) {    // stop 클릭시 지금까지 맞춰놓은 것 초기화. 그리고 시작 화면으로.
+              timeLeft[0] = 0;
+              timeLeft[1] = 0;
+              timeLeft[2] = 0;
+              status = prevStatus;
+              endSignal = true;
+              break;
+            }
+          }
+          if (endSignal) break;
+
+          while (true) {    // 초(sec) 조절 무한루프 (ok 또는 start 또는 stop버튼 눌러야 탈출)
+            if (debounce(plusButton) == true) {
+              timeLeft[2]++;
+              
+              send_time_info();
+            }
+            else if (debounce(minusButton) == true) {
+              timeLeft[2]--;
+
+              send_time_info();
+            }
+            else if (debounce(okButton) == true) {    // 시(hour)조절로 넘어감.
+              break;
+            }
+            else if (debounce(startButton) == true) {   // start 클릭시 타이머 시작으로
+              status = TIMER;
+              endSignal = true;
+              break;
+            }
+            else if (debounce(stopButton) == true) {  // stop 클릭시 지금까지 맞춰놓은 것 초기화. 그리고 시작 화면으로.
+              timeLeft[0] = 0;
+              timeLeft[1] = 0;
+              timeLeft[2] = 0;
+              status = prevStatus;
+              endSignal = true;
+              break;
+            }
+          }
+          if (endSignal) break;
+
+        } //while
+      } //while
+
+      //끝날 때까지 보관할 시간 정보.
+      time[0] = timeLeft[0];
+      time[1] = timeLeft[1];
+      time[2] = timeLeft[2];
+    
+      //prevStatus는 TIMER_CONFIG으로!
+      prevStatus = TIMER_CONFIG;
+      break;
+
+
+    case TIMER:
+      Serial.print("c");
+      set_led(GREEN);
       
-      case STATISTICS:
-        //사용량 통계 출력
-        //EEPROM에서 데이터 읽어야 함.
+      bool countMotionAlready = false;
+      bool countWeightAlready = false;
+
+      while (true) {
+        // 추가할 내용: 모션센서 관련 내용.
+
+
+        if (analogRead(weightSensorPin) < 10) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
+          set_led(RED);
+          if (countWeightAlready == false) {
+            count[1]++;
+            countWeightAlready = true;
+          }
+        }
+        else {    //꺼냄이 종료되었거나 꺼내지 않았을 때,
+          set_led(GREEN);
+          countWeightAlready = false;
+        }
+
+        send_time_info();
+
+        delay(995); //1초 기다림. (딜레이 고려해서 995ms으로 지정함.)
+
+        //아래는 남은 시간 1초 줄이는 과정
+        if (timeLeft[2] == 0) {   //0초일 때,
+          if (timeLeft[0] == 0 && timeLeft[1] == 0) {   //0시 0분 0초일 때,
+            status = ENDED;   // 타이머 종료 화면으로 넘어감.
+            break;
+          }
+          else if (timeLeft[1] != 0) {    // n분 0초일 때,
+            timeLeft[2] = 59;
+            timeLeft[1]--;
+          }
+          else {    // n시 0분 0초일 때,
+            timeLeft[2] = 59;
+            timeLeft[1] = 59;
+            timeLeft[0]--;
+          }
+        }
+        else {  // n초일 때
+          timeLeft[2]--;
+        }
+
+        //아래는 버튼 클릭되었나 확인하는 과정
+        if (debounce(stopButton)) {
+          status = STOPPED;   // 일시 중지 화면으로 넘어감.
+          break;
+        }
+        else if (debounce(optionButton)) {
+          status = OPTION;  // 옵션 화면으로 넘어감.
+          break;
+        }
+
+      }
+      prevStatus = TIMER;
+      break;
+
+
+    case OPTION:
       
-      case STOPPED:
-        //일시정지시 화면 출력
-        //
-      
-      case ENDED:
-        //타이머 종료시 화면 출력
-        //EEPROM에 데이터 쓰기
-      
-      default:
+      //환경설정 화면 출력
+      //환경설정 후에는 최근에 들어있던 모드로 복귀해야 함. (데이터 손상 없이)
+    
+
+    case STATISTICS:
+      //사용량 통계 출력
+      //EEPROM에서 데이터 읽어야 함.
+    
+
+    case STOPPED:
+      //일시정지시 화면 출력
+      Serial.print("f");
+      send_time_info();
+      set_led(ORANGE);
+      while (true) {
+        if (debounce(okButton)) {
+          status = TIMER;
+          break;
+        }
+        else if (debounce(stopButton)) {
+          status = ENDED;
+          break;
+        }
+        else if (debounce(optionButton)) {
+          status = OPTION;
+          break;
+        }
+      }
+      prevStatus = STOPPED;
+      break;
+    
+
+    case ENDED:
+      //타이머 종료시 화면 출력
+      Serial.print("g");
+      set_led(ORANGE);
+
+      // 접근, 꺼낸 기록 전송
+      Serial.print(count[0]);
+      Serial.print(",");
+      Serial.print(count[1]);
+
+      // 시간 정보 전송
+      Serial.print(time[0]);
+      Serial.print(",");
+      Serial.print(time[1]);
+      Serial.print(",");
+      Serial.print(time[2]);
+
+      if (correctEnding) {    //정상 종료일 경우(타이머 다 되서 종료)
+        //EEPROM에 기록. 한 타이머 기록 단위 당 10바이트 쓸 예정
+        EEPROM.write(eepromAddress, (char)time[0]);
+        eepromAddress++;
+        EEPROM.write(eepromAddress, (char)time[1]);
+        eepromAddress++;
+        EEPROM.write(eepromAddress, (char)time[2]);
+        eepromAddress++;
+        EEPROM.write(eepromAddress, (char)count[0]);
+        eepromAddress++;
+        EEPROM.write(eepromAddress, (char)count[1]);
+        eepromAddress += 5;
+
+        correctEnding = false;
+      }
+      timeLeft[0] = 0;
+      timeLeft[1] = 0;
+      timeLeft[2] = 0;
+      time[0] = 0;
+      time[1] = 0;
+      time[2] = 0;
+
+      while (true) {
+        if (debounce(okButton) || debounce(stopButton) || debounce(startButton)) break; 
+      }
+      status = START;
+      prevStatus = ENDED;
+    
+    default:
 
 
   }
-  }
+
   
 }
