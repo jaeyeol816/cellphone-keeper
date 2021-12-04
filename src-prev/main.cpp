@@ -75,8 +75,8 @@ Adafruit_NeoPixel pixels2 = Adafruit_NeoPixel(NUM_OF_PIXELS, led2Pin, NEO_GRB + 
 
 
 void setup() {
-  Serial.begin(9600);   //연결된 lcd용 아두이노와 통신하기 위해
-
+  Serial.begin(115200);   //연결된 lcd용 아두이노와 통신하기 위해
+  // Serial.begin(9600);
 
   pinMode(startButton, INPUT_PULLUP);
   pinMode(stopButton, INPUT_PULLUP);
@@ -188,11 +188,10 @@ bool debounce(int button) {   // 인수로 들어온 버튼이 클릭되었으�
 }
 
 void send_time_info() {
-  Serial.print(timeLeft[0]);
-  Serial.print(",");
-  Serial.print(timeLeft[1]);
-  Serial.print(",");
-  Serial.println(timeLeft[2]);
+  Serial.print((char)('0' + timeLeft[0]));
+  Serial.print((char)('0' + timeLeft[1]));
+  Serial.print((char)('0' + timeLeft[2]));
+  Serial.print('p');
 }
 
 void loop() {
@@ -203,7 +202,7 @@ while(true){
   // if start
   if (status == START) {
     //시작 메뉴 출력
-    Serial.println("a");  //연결된 lcd용 아두이노에게 a 신호를 보낸다. (시작 메뉴를 출력하도록 하기위해)
+    Serial.print("a");  //연결된 lcd용 아두이노에게 a 신호를 보낸다. (시작 메뉴를 출력하도록 하기위해)
     set_led(BLUE);
 
 
@@ -219,7 +218,7 @@ while(true){
       }
     }
     prevStatus = START;
-    Serial.println("x");
+    Serial.print("x");
 
   }
   else if (status == TIMER_CONFIG) {
@@ -228,7 +227,7 @@ while(true){
     bool endSignal = false;    // 0 --> 계속 무한루프 돈다. 1 --> 탈출
 
     //타이머 설정 화면 출력
-    Serial.println("b");  //연결된 lcd용 아두이노에게 b 신호를 보낸다. (타이머설정화면메뉴를 출력하도록 하기 위해)
+    Serial.print("b");  //연결된 lcd용 아두이노에게 b 신호를 보낸다. (타이머설정화면메뉴를 출력하도록 하기 위해)
     set_led(SKY);
 
     // LCD에게 timeLeft 정보 보내기.
@@ -237,7 +236,7 @@ while(true){
     // 무한루프
     while (true) {
       
-      Serial.println("H");
+      Serial.print("H");
       while (true) {    // 시(hour) 조절 무한루프 (ok 또는 start또는 stop버튼 눌려야 탈출)
         
         if (debounce(plusButton)) {
@@ -272,20 +271,20 @@ while(true){
           break;
         }
       }
-      Serial.println("o");
+      Serial.print("o");
       if (endSignal) break;
 
-      Serial.println("M");
+      Serial.print("M");
       while (true) {    // 분(min) 조절 무한루프 (ok 또는 start 또는 stop 버튼 눌러야 탈출)
         
         if (debounce(plusButton)) {
-          timeLeft[1]++;
+          if (timeLeft[1] < 60) timeLeft[1]++;
           
           send_time_info();
           delay(300);
         }
         if (debounce(minusButton)) {
-          timeLeft[1]--;
+          if (timeLeft[1] > 0) timeLeft[1]--;
 
           send_time_info();
           delay(300);
@@ -310,10 +309,10 @@ while(true){
           break;
         }
       }
-      Serial.println("o");
+      Serial.print("o");
       if (endSignal) break;
 
-      Serial.println("S");
+      Serial.print("S");
       while (true) {    // 초(sec) 조절 무한루프 (ok 또는 start 또는 stop버튼 눌러야 탈출)
         
         if (debounce(plusButton)) {
@@ -348,7 +347,7 @@ while(true){
           break;
         }
       }  //while
-      Serial.println("o");
+      Serial.print("o");
       if (endSignal) break;
 
     } //while
@@ -360,13 +359,13 @@ while(true){
   
     //prevStatus는 TIMER_CONFIG으로!
     prevStatus = TIMER_CONFIG;
-    Serial.println("x");
+    Serial.print("x");
     delay(100);
 
   }
   else if (status == TIMER) {
 
-    Serial.println("c");
+    Serial.print("c");
     set_led(GREEN);
     int color = GREEN;
     
@@ -452,8 +451,6 @@ while(true){
 
       delay(480); //1초 기다림 중 2부.  (딜레이 고려해서 980ms으로 지정함.)
 
-      //TEST CODE
-      Serial.println(analogRead(weightSensorPin));
 
 
 
@@ -485,14 +482,14 @@ while(true){
 
     }
     prevStatus = TIMER;
-    Serial.println("x");
+    Serial.print("x");
 
   }
   else if (status == STATISTICS) {
 
     //사용량 통계 출력
       //EEPROM에서 데이터 읽어야 함.
-      Serial.println("e");
+      Serial.print("e");
       set_led(BLUE);
 
       int i = 0;
@@ -514,9 +511,9 @@ while(true){
         }
         i++;
       }
-      Serial.println("y");
+      Serial.print("y");
       Serial.print((char)(sumOfClose / (i / 10 + 1)));    // 1분당 접근횟수의 평균 보낸다.
-      Serial.println("z");
+      Serial.print("z");
       Serial.print((char)(sumOfOut / (i / 10 + 1)));    // 1분당 꺼낸횟수의 평균 보낸다.
 
       while (true) {
@@ -532,7 +529,7 @@ while(true){
   else if (status == STOPPED) {
 
     //일시정지시 화면 출력
-      Serial.println("f");
+      Serial.print("f");
       send_time_info();
       set_led(ORANGE);
       while (true) {
@@ -546,26 +543,26 @@ while(true){
         }
       }
       prevStatus = STOPPED;
-      Serial.println("x");
+      Serial.print("x");
 
   }
   else if (status == ENDED) {
     
     //타이머 종료시 화면 출력
-      Serial.println("g");
+      Serial.print("g");
       set_led(PURPLE);                                                                    
 
       // 접근, 꺼낸 기록 전송
-      Serial.print(count[0]);
-      Serial.print(",");
-      Serial.println(count[1]);
+      Serial.print((char)('0' + count[0]));
+      Serial.print((char)('0' + count[1]));
+
 
       // 시간 정보 전송
-      Serial.print(time[0]);
-      Serial.print(",");
-      Serial.print(time[1]);
-      Serial.print(",");
-      Serial.println(time[2]);
+      Serial.print((char)('0' + time[0]));
+      Serial.print((char)('0' + time[1]));
+      Serial.print((char)('0' + time[2]));
+
+      Serial.print('p');
 
       if (correctEnding) {    //정상 종료일 경우(타이머 다 되서 종료)
         //EEPROM에 기록. 한 타이머 기록 단위 당 10바이트 쓸 예정
@@ -601,7 +598,7 @@ while(true){
         if (debounce(okButton) || debounce(stopButton) || debounce(startButton)) break; 
       }
       status = START;
-      Serial.println("x");
+      Serial.print("x");
       prevStatus = ENDED;
       
 
