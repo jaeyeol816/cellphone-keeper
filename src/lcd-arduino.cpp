@@ -84,10 +84,23 @@ void loop(){
           if (Serial.read() == 'x') break;    //p 읽음.
 
           char buf[15];
-          sprintf(buf, "%d:%d:%d", h, m, s);
+          sprintf(buf, "%d : %d : %d", h, m, s);
           tft.fillScreen(WHITE);
           showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Set Timer", BLUE);
+          delay(5);
           showmsgXY(20, 150, 2, &FreeSans12pt7b, buf, BLUE);
+          delay(5);
+          showmsgXY(20, 170, 2, &FreeSerif12pt7b, "__", BLUE);
+          delay(5);
+          showmsgXY(10, 220, 1, &FreeSerif12pt7b, "change hours-> +, - button", BLACK);
+          delay(5);
+          showmsgXY(10, 240, 1, &FreeSerif12pt7b, "manipulate 'minutes'-> OK button", BLACK);
+          delay(5);
+          showmsgXY(10, 260, 1, &FreeSerif12pt7b, "start timer-> start button", BLACK);
+          delay(5);
+          showmsgXY(10, 280, 1, &FreeSerif12pt7b, "stop timer-> stop button", BLACK);
+          delay(5);
+
           break;
 
         }
@@ -102,6 +115,7 @@ void loop(){
 
           if (unit == 'H') {
 
+            showmsgXY(20, 170, 2, &FreeSerif12pt7b, "__", BLUE);
             while (true) {
               if (Serial.available() > 0) { 
                 int h = Serial.read();
@@ -129,14 +143,26 @@ void loop(){
                 sprintf(buf, "%d : %d : %d", h, m, s);
                 tft.fillScreen(WHITE);
                 showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Set Timer", BLUE);
+                delay(5);
                 showmsgXY(20, 150, 2, &FreeSans12pt7b, buf, BLUE);
-              
+                delay(5);
+                showmsgXY(20, 170, 2, &FreeSerif12pt7b, "__", BLUE);
+                delay(5);
+                showmsgXY(10, 220, 1, &FreeSerif12pt7b, "change hours-> +, - button", BLACK);
+                delay(5);
+                showmsgXY(10, 240, 1, &FreeSerif12pt7b, "manipulate 'minutes'-> OK button", BLACK);
+                delay(5);
+                showmsgXY(10, 260, 1, &FreeSerif12pt7b, "start timer-> start button", BLACK);
+                delay(5);
+                showmsgXY(10, 280, 1, &FreeSerif12pt7b, "stop timer-> stop button", BLACK);
+                delay(10);
+                
               }
             } // while of H
 
           }
           else if (unit == 'M') {
-
+            showmsgXY(20, 170, 2, &FreeSerif12pt7b, "     __", BLUE);
             while (true) {
               if (Serial.available() > 0) { 
                 int h = Serial.read();
@@ -164,13 +190,26 @@ void loop(){
                 sprintf(buf, "%d : %d : %d", h, m, s);
                 tft.fillScreen(WHITE);
                 showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Set Timer", BLUE);
+                delay(5);
                 showmsgXY(20, 150, 2, &FreeSans12pt7b, buf, BLUE);
+                delay(5);
+                showmsgXY(20, 170, 2, &FreeSerif12pt7b, "     __", BLUE);
+                delay(5);
+                showmsgXY(10, 220, 1, &FreeSerif12pt7b, "change minutes-> +, - button", BLACK);
+                delay(5);
+                showmsgXY(10, 240, 1, &FreeSerif12pt7b, "manipulate 'seconds'-> OK button", BLACK);
+                delay(5);
+                showmsgXY(10, 260, 1, &FreeSerif12pt7b, "start timer-> start button", BLACK);
+                delay(5);
+                showmsgXY(10, 280, 1, &FreeSerif12pt7b, "stop timer-> stop button", BLACK);
+                delay(10);
               }
             } // while of M
 
           }
           else if (unit == 'S') {
 
+            showmsgXY(20, 170, 2, &FreeSerif12pt7b, "         __", BLUE);
             while (true) {
               if (Serial.available() > 0) { 
                 int h = Serial.read();
@@ -199,6 +238,12 @@ void loop(){
                 tft.fillScreen(WHITE);
                 showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Set Timer", BLUE);
                 showmsgXY(20, 150, 2, &FreeSans12pt7b, buf, BLUE);
+                showmsgXY(20, 170, 2, &FreeSerif12pt7b, "         __", BLUE);
+                showmsgXY(10, 220, 1, &FreeSerif12pt7b, "change seconds-> +, - button", BLACK);
+                showmsgXY(10, 240, 1, &FreeSerif12pt7b, "manipulate 'hour'-> OK button", BLACK);
+                showmsgXY(10, 260, 1, &FreeSerif12pt7b, "start timer-> start button", BLACK);
+                showmsgXY(10, 280, 1, &FreeSerif12pt7b, "stop timer-> stop button", BLACK);
+                delay(10);
               }
             } // while of S
 
@@ -220,7 +265,8 @@ void loop(){
     }
     else if (letter == 'c') {
       tft.fillScreen(WHITE);
-      showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Timer", BLUE);
+      showmsgXY(10, 50, 2, &FreeMonoBold12pt7b, "Be away of phone!", BLUE);
+      showmsgXY(10, 150, 1, &FreeMonoBold12pt7b, "Timer", BLUE);
       while (true) {
         if (Serial.available() > 0) {
           int h = Serial.read();
@@ -242,10 +288,12 @@ void loop(){
 
           
           char buf[15];
-          sprintf(buf, "%d:%d:%d", h, m, s);
+          sprintf(buf, "%d : %d: %d", h, m, s);
           tft.fillScreen(WHITE);
-          showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Timer", BLUE);
-          showmsgXY(20, 150, 2, &FreeSans12pt7b, buf, BLUE);
+          showmsgXY(10, 50, 2, &FreeMonoBold12pt7b, "Be away of phone!", BLUE);
+          showmsgXY(10, 150, 1, &FreeMonoBold12pt7b, "Timer", BLUE);
+          showmsgXY(20, 200, 2, &FreeSans12pt7b, buf, BLUE);
+          showmsgXY(10, 240, 1, &FreeSerif12pt7b, "pause/stop timer-> stop button", BLACK);
 
         }
       } //while
@@ -282,10 +330,12 @@ void loop(){
 
           
           char buf[15];
-          sprintf(buf, "%d:%d:%d left.", h, m, s);
+          sprintf(buf, "%d : %d : %d left.", h, m, s);
           tft.fillScreen(WHITE);
           showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "Paused", BLUE);
           showmsgXY(20, 150, 2, &FreeSans12pt7b, buf, BLUE);
+          showmsgXY(10, 220, 1, &FreeSerif12pt7b, "resume timer-> start button", BLACK);
+          showmsgXY(10, 220, 1, &FreeSerif12pt7b, "terminate timer-> stop button", BLACK);
 
         }
       }  // while
@@ -329,13 +379,14 @@ void loop(){
           tft.fillScreen(WHITE);
           showmsgXY(10, 60, 2, &FreeMonoBold12pt7b, "End!", BLUE);
           char buf1[25];
-          sprintf(buf1, "approach: %d times\ntake out: %d times", closeCount, outCount);
+          sprintf(buf1, "approach: %d times\n  take out: %d times", closeCount, outCount);
           
           char buf2[25];
           sprintf(buf2, "time: %dh %dm %ds", h, m, s);
 
           showmsgXY(20, 150, 1, &FreeSerif12pt7b, buf1, RED);
-          showmsgXY(20, 150, 1, &FreeSerif12pt7b, buf2, GREEN);
+          showmsgXY(20, 220, 1, &FreeSerif12pt7b, buf2, BLACK);
+          showmsgXY(5, 250, 1, &FreeSerif12pt7b, "move to start menu-> start button", BLUE);
 
         }
 

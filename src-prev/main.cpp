@@ -84,6 +84,8 @@ void setup() {
   pinMode(minusButton, INPUT_PULLUP);
   pinMode(okButton, INPUT_PULLUP);
 
+  pinMode(speakerPin, OUTPUT);
+
   pixels1.begin();
   pixels2.begin();
   
@@ -278,13 +280,13 @@ while(true){
       while (true) {    // 분(min) 조절 무한루프 (ok 또는 start 또는 stop 버튼 눌러야 탈출)
         
         if (debounce(plusButton)) {
-          if (timeLeft[1] < 60) timeLeft[1]++;
+          if (timeLeft[2] < 60) timeLeft[1]++;
           
           send_time_info();
           delay(300);
         }
         if (debounce(minusButton)) {
-          if (timeLeft[1] > 0) timeLeft[1]--;
+          if (timeLeft[2] > 0) timeLeft[1]--;
 
           send_time_info();
           delay(300);
@@ -301,7 +303,7 @@ while(true){
         }
         if (debounce(stopButton) == true) {    // stop 클릭시 지금까지 맞춰놓은 것 초기화. 그리고 시작 화면으로.
           timeLeft[0] = 0;
-          timeLeft[1] = 0;
+          timeLeft[1] = 0;  
           timeLeft[2] = 0;
           status = prevStatus;
           endSignal = true;
@@ -377,7 +379,7 @@ while(true){
       if (digitalRead(motionSensorPin) == LOW) {  //모션센서에서 휴대폰에 접근했다고 반응될 때,
         set_led(YELLOW);
         color = YELLOW;
-        tone(speakerPin, 350, 10);
+        tone(speakerPin, 500, 10);
         if (countMotionAlready == false) {
           count[0]++;
           countMotionAlready = true;
@@ -394,7 +396,7 @@ while(true){
       if (analogRead(weightSensorPin) < 10) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
         set_led(RED);
         color = RED;
-        tone(speakerPin, 500, 10);
+        tone(speakerPin, 700, 10);
         if (countWeightAlready == false) {
           count[1]++;
           countWeightAlready = true;
@@ -403,6 +405,7 @@ while(true){
       else {    //꺼냄이 종료되었거나 꺼내지 않았을 때,
         if (color == RED || color == GREEN) {
           set_led(GREEN);
+          color = GREEN;
         }
         
         countWeightAlready = false;
@@ -417,7 +420,7 @@ while(true){
       if (digitalRead(motionSensorPin) == 0) {  //모션센서에서 휴대폰에 접근했다고 반응될 때,
         set_led(YELLOW);
         color = YELLOW;
-        tone(speakerPin, 350, 10);
+        tone(speakerPin, 500, 10);
         if (countMotionAlready == false) {
           count[0]++;
           countMotionAlready = true;
@@ -435,7 +438,7 @@ while(true){
       if (analogRead(weightSensorPin) < 10) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
         set_led(RED);
         color = RED;
-        tone(speakerPin, 500, 10);
+        tone(speakerPin, 700, 10);
         if (countWeightAlready == false) {
           count[1]++;
           countWeightAlready = true;
@@ -543,6 +546,7 @@ while(true){
         }
       }
       prevStatus = STOPPED;
+      delay(100);
       Serial.print("x");
 
   }
