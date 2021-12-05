@@ -190,9 +190,13 @@ bool debounce(int button) {   // 인수로 들어온 버튼이 클릭되었으�
 }
 
 void send_time_info() {
+  delay(10);
   Serial.print((char)('0' + timeLeft[0]));
+  delay(5);
   Serial.print((char)('0' + timeLeft[1]));
+  delay(5);
   Serial.print((char)('0' + timeLeft[2]));
+  delay(5);
   Serial.print('p');
 }
 
@@ -214,10 +218,10 @@ while(true){
         status = TIMER_CONFIG;
         break;
       }
-      else if (debounce(plusButton)) {    // +버튼 클릭시
-        status = STATISTICS;
-        break;
-      }
+      // else if (debounce(plusButton)) {    // +버튼 클릭시
+      //   status = STATISTICS;
+      //   break;
+      // }
     }
     prevStatus = START;
     Serial.print("x");
@@ -379,7 +383,7 @@ while(true){
       if (digitalRead(motionSensorPin) == LOW) {  //모션센서에서 휴대폰에 접근했다고 반응될 때,
         set_led(YELLOW);
         color = YELLOW;
-        tone(speakerPin, 500, 10);
+        tone(speakerPin, 200, 10);
         if (countMotionAlready == false) {
           count[0]++;
           countMotionAlready = true;
@@ -393,10 +397,10 @@ while(true){
         countMotionAlready = false;
       }
 
-      if (analogRead(weightSensorPin) < 10) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
+      if (analogRead(weightSensorPin) < 30) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
         set_led(RED);
         color = RED;
-        tone(speakerPin, 700, 10);
+        tone(speakerPin, 280, 10);
         if (countWeightAlready == false) {
           count[1]++;
           countWeightAlready = true;
@@ -420,7 +424,7 @@ while(true){
       if (digitalRead(motionSensorPin) == 0) {  //모션센서에서 휴대폰에 접근했다고 반응될 때,
         set_led(YELLOW);
         color = YELLOW;
-        tone(speakerPin, 500, 10);
+        tone(speakerPin, 200, 10);
         if (countMotionAlready == false) {
           count[0]++;
           countMotionAlready = true;
@@ -435,10 +439,10 @@ while(true){
         countMotionAlready = false;
       }
 
-      if (analogRead(weightSensorPin) < 10) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
+      if (analogRead(weightSensorPin) < 30) {   // 무게센서에서 휴대폰 꺼낸 거라고 반응될때,
         set_led(RED);
         color = RED;
-        tone(speakerPin, 700, 10);
+        tone(speakerPin, 280, 10);
         if (countWeightAlready == false) {
           count[1]++;
           countWeightAlready = true;
@@ -535,8 +539,10 @@ while(true){
       Serial.print("f");
       send_time_info();
       set_led(ORANGE);
+      delay(500);
+      
       while (true) {
-        if (debounce(okButton)) {
+        if (debounce(startButton)) {
           status = TIMER;
           break;
         }
@@ -546,7 +552,7 @@ while(true){
         }
       }
       prevStatus = STOPPED;
-      delay(100);
+
       Serial.print("x");
 
   }
@@ -561,36 +567,38 @@ while(true){
       Serial.print((char)('0' + count[1]));
 
 
-      // 시간 정보 전송
+      // 시간 정보 전송.
+      
       Serial.print((char)('0' + time[0]));
       Serial.print((char)('0' + time[1]));
       Serial.print((char)('0' + time[2]));
 
       Serial.print('p');
+      delay(300);
 
-      if (correctEnding) {    //정상 종료일 경우(타이머 다 되서 종료)
-        //EEPROM에 기록. 한 타이머 기록 단위 당 10바이트 쓸 예정
-        EEPROM.write(eepromAddress, (char)time[0]);
-        eepromAddress++;
-        EEPROM.write(eepromAddress, (char)time[1]);
-        eepromAddress++;
-        EEPROM.write(eepromAddress, (char)time[2]);
-        eepromAddress++;
-        EEPROM.write(eepromAddress, (char)count[0]);
-        eepromAddress++;
-        EEPROM.write(eepromAddress, (char)count[1]);
-        eepromAddress ++;
+      // if (correctEnding) {    //정상 종료일 경우(타이머 다 되서 종료)
+      //   //EEPROM에 기록. 한 타이머 기록 단위 당 10바이트 쓸 예정
+      //   EEPROM.write(eepromAddress, (char)time[0]);
+      //   eepromAddress++;
+      //   EEPROM.write(eepromAddress, (char)time[1]);
+      //   eepromAddress++;
+      //   EEPROM.write(eepromAddress, (char)time[2]);
+      //   eepromAddress++;
+      //   EEPROM.write(eepromAddress, (char)count[0]);
+      //   eepromAddress++;
+      //   EEPROM.write(eepromAddress, (char)count[1]);
+      //   eepromAddress ++;
 
-        //1분당 접근횟수 계산
-        int closePerMin = (int)(((double)count[0] / (time[2] + 60*time[1] + 3600*time[2])) * 60 + 0.5);
-        EEPROM.write(eepromAddress, (char)closePerMin);
+      //   //1분당 접근횟수 계산
+      //   int closePerMin = (int)(((double)count[0] / (time[2] + 60*time[1] + 3600*time[2])) * 60 + 0.5);
+      //   EEPROM.write(eepromAddress, (char)closePerMin);
 
-        //1분당 꺼낸횟수 계산
-        int outPerMin = (int)(((double)count[1] / (time[2] + 60*time[1] + 3600*time[2])) * 60 + 0.5);
-        EEPROM.write(eepromAddress, (char)outPerMin);
+      //   //1분당 꺼낸횟수 계산
+      //   int outPerMin = (int)(((double)count[1] / (time[2] + 60*time[1] + 3600*time[2])) * 60 + 0.5);
+      //   EEPROM.write(eepromAddress, (char)outPerMin);
 
-        correctEnding = false;
-      }
+      //   correctEnding = false;
+      // }
       timeLeft[0] = 0;
       timeLeft[1] = 0;
       timeLeft[2] = 0;
