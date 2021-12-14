@@ -433,7 +433,7 @@ while(true){
       else {    //접근이 종료되었거나 접근하지 않았을때
         if (color == YELLOW || color == GREEN) {
           set_led(GREEN);
-          color == GREEN;
+          color = GREEN;
         }
         
         countMotionAlready = false;

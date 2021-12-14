@@ -138,7 +138,7 @@ void loop(){
 
                 Serial.read();    // p 읽음.
 
-               
+              
                 char buf[15];
                 sprintf(buf, "%d : %d : %d", h, m, s);
                 tft.fillScreen(WHITE);
@@ -162,7 +162,7 @@ void loop(){
 
           }
           else if (unit == 'M') {
-            showmsgXY(20, 170, 2, &FreeSerif12pt7b, "     __", BLUE);
+            showmsgXY(20, 170, 2, &FreeSerif12pt7b, "    __", BLUE);
             while (true) {
               if (Serial.available() > 0) { 
                 int h = Serial.read();
@@ -185,7 +185,7 @@ void loop(){
 
                 Serial.read();    // p 읽음.
 
-               
+              
                 char buf[15];
                 sprintf(buf, "%d : %d : %d", h, m, s);
                 tft.fillScreen(WHITE);
@@ -232,7 +232,6 @@ void loop(){
 
                 if (Serial.read() == 'o') break;    // p 읽음.
 
-               
                 char buf[15];
                 sprintf(buf, "%d : %d : %d", h, m, s);
                 tft.fillScreen(WHITE);
@@ -296,7 +295,7 @@ void loop(){
           char buf[15];
           sprintf(buf, "%d : %d: %d", h, m, s);
           tft.fillScreen(WHITE);
-          showmsgXY(10, 50, 2, &FreeMonoBold12pt7b, "Be away of phone!", BLUE);
+          showmsgXY(10, 50, 2, &FreeMonoBold12pt7b, "Be away of  phone!", BLUE);
           showmsgXY(10, 150, 1, &FreeMonoBold12pt7b, "Timer", BLUE);
           showmsgXY(20, 200, 2, &FreeSans12pt7b, buf, BLUE);
           showmsgXY(10, 240, 1, &FreeSans9pt7b, "pause/stop timer-> stop button", BLACK);
@@ -393,7 +392,7 @@ void loop(){
 
           showmsgXY(20, 150, 1, &FreeSerif12pt7b, buf1, RED);
           showmsgXY(20, 220, 1, &FreeSerif12pt7b, buf2, BLACK);
-          showmsgXY(5, 250, 1, &FreeSerif12pt7b, "move to start menu-> start button", BLUE);
+          showmsgXY(5, 250, 1, &FreeSerif12pt7b, "go to start menu-> start button", BLUE);
 
         }
 
